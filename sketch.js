@@ -1,24 +1,47 @@
-var sea1;
-var ship;
+
 function preload(){
-seaImg =loadImage("sea.png");
-shipImg1=loadImage("ship-1.png");
+  //pre-load images
+  path_image=loadImage("path.png");
+  man_running=loadAnimation("Runner-1.png","Runner-2.png");
 }
 
-function setup(){
+function setup()
+{
   createCanvas(400,400);
-  sea1=createSprite(200,200,20,20)
-  sea1.addImage(seaImg)
-  ship=createSprite(200,300,20,20);
-  ship.addImage(shipImg1);
-  ship.scale=0.25;
+  //create sprites here
+  path=createSprite(200,200);
+  path.addImage(path_image)
+  path.velocityY=4;
+  path.scale=1.2;
+  
+  
+  //this creates runner sprite and adds the animation that was preloaded and shrinks the scale of the animation
+  runner=createSprite(300,200);
+  runner.addAnimation("running",man_running);
+  runner.scale=0.1;
+
+
+  boundary_left=createSprite(35,300,30,600);
+  boundary_left.visible=false;
+  boundary_right=createSprite(365,300,30,600);
+  boundary_right.visible=false;
 }
 
 function draw() {
-  background("blue");
-  sea1.velocityX=-3
-  if(sea1.x<0){
-    sea1.x=sea1.width/2;
+  background(0);
+  
+  
+  if(path.y>400)
+  {
+   path.y=height/2;
   }
+  
+  
+  runner.x=mouseX;
+  //makes the runner collide with the invisible boundary
+  runner.collide(boundary_left);
+  runner.collide(boundary_right);
+
+
   drawSprites();
 }
