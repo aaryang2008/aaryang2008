@@ -1,47 +1,72 @@
+var garden,rabbit;
+var gardenImg,rabbitImg;
 
 function preload(){
-  //pre-load images
-  path_image=loadImage("path.png");
-  man_running=loadAnimation("Runner-1.png","Runner-2.png");
+  gardenImg = loadImage("garden.png");
+  rabbitImg = loadImage("rabbit.png");
+  appleImg = loadImage("apple.png");
+  leaveImg =loadImage("leaf.png");
 }
 
 function setup()
 {
   createCanvas(400,400);
-  //create sprites here
-  path=createSprite(200,200);
-  path.addImage(path_image)
-  path.velocityY=4;
-  path.scale=1.2;
   
+  // Moving background
+  garden=createSprite(200,200);
+  garden.addImage(gardenImg);
   
-  //this creates runner sprite and adds the animation that was preloaded and shrinks the scale of the animation
-  runner=createSprite(300,200);
-  runner.addAnimation("running",man_running);
-  runner.scale=0.1;
-
-
-  boundary_left=createSprite(35,300,30,600);
-  boundary_left.visible=false;
-  boundary_right=createSprite(365,300,30,600);
-  boundary_right.visible=false;
+  //creating boy running
+  rabbit = createSprite(180,340,30,30);
+  rabbit.scale =0.09;
+  rabbit.addImage(rabbitImg);
 }
+  
+  
 
-function draw() {
+
+
+function draw() 
+{
   background(0);
+  rabbit.x=mouseX;
+  edges= createEdgeSprites();
+  rabbit.collide(edges);
   
   
-  if(path.y>400)
-  {
-   path.y=height/2;
+  var select_sprites =Math.round(random(1,2));
+  
+  
+  if(frameCount % 80 == 0){
+    if(select_sprites == 1) {
+    createApples();
+   } 
+   else{
+     createLeaves();
+   }
+
   }
-  
-  
-  runner.x=mouseX;
-  //makes the runner collide with the invisible boundary
-  runner.collide(boundary_left);
-  runner.collide(boundary_right);
 
-
+  
   drawSprites();
 }
+  function createApples()
+    {
+     apple=createSprite(random(50,350),40,10,10);
+     apple.addImage(appleImg);
+     apple.scale=0.1;
+     apple.velocityY=4;
+     apple.lifetime=200;
+    }
+   
+   
+    function createLeaves()
+    {
+      leaves=createSprite(random(50,350),40,10,10);
+      leaves.addImage(leaveImg);
+      leaves.scale=0.1;
+      leaves.velocityY=4
+      leaves.lifetime=200;
+    }
+      
+   
