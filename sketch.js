@@ -1,148 +1,180 @@
-//Game States
-var PLAY=1;
-var END=0;
-var gameState=1;
+var path,mainCyclist;
+var player1,player2,player3;
+var pathImg,mainRacerImg1,mainRacerImg2;
 
-var knife,fruit ,monster,fruitGroup,monsterGroup, score,r,randomFruit, position;
-var knifeImage , fruit1, fruit2 ,fruit3,fruit4, monsterImage, gameOverImage;
-var GameOver,knifeSwooshSound;
+var oppPink1Img,oppPink2Img;
+var oppYellow1Img,oppYellow2Img;
+var oppRed1Img,oppRed2Img;
+var gameOverImg,cycleBell;
+
+var pinkCG, yellowCG,redCG; 
+
+var END =0;
+var PLAY =1;
+var gameState = PLAY;
+
+var distance=0;
+var gameOver, restart;
+
 function preload(){
+  pathImg = loadImage("images/Road.png");
+  mainRacerImg1 = loadAnimation("images/mainPlayer1.png","images/mainPlayer2.png");
+  mainRacerImg2= loadAnimation("images/mainPlayer3.png");
   
-  knifeImage = loadImage("knife.png");
-  monsterImage = loadAnimation("alien1.png","alien2.png")
-  fruit1 = loadImage("fruit1.png");
-  fruit2 = loadImage("fruit2.png");
-  fruit3 = loadImage("fruit3.png");
-  fruit4 = loadImage("fruit4.png");
-  gameOverImage = loadImage("gameover.png")
-  knifeSwooshSound=loadSound("knifeSwoosh.mp3");
-  GameOver=("gameover.mp3");
-
-  //load sound here
+  oppPink1Img = loadAnimation("images/opponent1.png","images/opponent2.png");
+  oppPink2Img = loadAnimation("images/opponent3.png");
+  
+  oppYellow1Img = loadAnimation("images/opponent4.png","images/opponent5.png");
+  oppYellow2Img = loadAnimation("images/opponent6.png");
+  
+  oppRed1Img = loadAnimation("images/opponent7.png","images/opponent8.png");
+  oppRed2Img = loadAnimation("images/opponent9.png");
+  
+  cycleBell = loadSound("sound/bell.mp3");
+  gameOverImg = loadImage("images/gameOver.png");
 }
 
-
-
-function setup() {
-  createCanvas(600, 600);
+function setup(){
   
-  //creating sword
-   knife=createSprite(40,200,20,20);
-   knife.addImage(knifeImage);
-   knife.scale=0.7
-  
-  //set collider for sword
-  knife.setCollider("rectangle",0,0,40,40);
+createCanvas(1200,300);
+// Moving background
+path=createSprite(100,150);
+path.addImage(pathImg);
+path.velocityX = -5;
 
-  // Score variables and Groups
-  score=0;
-  fruitGroup=createGroup();
-  monsterGroup=createGroup();
+//creating boy running
+mainCyclist  = createSprite(70,150);
+mainCyclist.addAnimation("SahilRunning",mainRacerImg1);
+mainCyclist.scale=0.07;
+  
+//set collider for mainCyclist
+
+  
+gameOver = createSprite(650,150);
+gameOver.addImage(gameOverImg);
+gameOver.scale = 0.8;
+gameOver.visible = false;  
+  
+pinkCG = new Group();
+yellowCG = new Group();
+redCG = new Group();
   
 }
 
 function draw() {
-  background("lightblue");
+  background(0);
+  
+  drawSprites();
+  textSize(20);
+  fill(255);
+  text("Distance: "+ distance,900,30);
   
   if(gameState===PLAY){
     
-    //Call fruits and Monster function
-    fruits();
-    Monster();
-    
-    // Move sword with mouse
-    knife.y=World.mouseY;
-    knife.x=World.mouseX;
+   distance = distance + Math.round(getFrameRate()/50);
+   path.velocityX = -(6 + 2*distance/150);
   
-    // Increase score if sword touching fruit
-    if(fruitGroup.isTouching(knife)){
-      fruitGroup.destroyEach();
-      knifeSwooshSound.play();
-      score=score+2;
-    }
-    else
-    {
-      // Go to end state if sword touching enemy
-      if(monsterGroup.isTouching(knife)){
-        gameState=END;
-        
-        //add gameover sound here
-        GameOver.play();
-        fruitGroup.destroyEach();
-        monsterGroup.destroyEach();
-        fruitGroup.setVelocityXEach(0);
-        monsterGroup.setVelocityXEach(0);
-        
-        // Change the animation of sword to gameover and reset its position
-        knife.addImage(gameOverImage);
-        knife.scale=2;
-        knife.x=300;
-        knife.y=300;
-      }
-    }
+   mainCyclist.y = World.mouseY;
+  
+   edges= createEdgeSprites();
+   mainCyclist.collide(edges);
+  
+  //code to reset the background
+  if(path.x < 0 ){
+    path.x = width/2;
   }
   
-  drawSprites();
-  //Display score
-  textSize(25);
-  text("Score : "+ score,250,50);
-}
-
-
-function Monster(){
-  if(World.frameCount%200===0){
-    monster=createSprite(400,200,20,20);
-    monster.addAnimation("moving", monsterImage);
-    monster.y=Math.round(random(100,550));
-    //update below give line of code for increase monsterGroup speed by 10
-    monster.velocityX = -(8+(score/10));
-    monster.setLifetime=50;
-    
-    monsterGroup.add(monster);
+    //code to play cycle bell sound
+  if(keyDown("space")) {
+    cycleBell.play();
   }
-}
-
-function fruits(){
-  if(World.frameCount%80===0){
-    position = Math.round(random(1,2));
-    fruit=createSprite(400,200,20,20);
-    
-     //using random variable change the position of fruit, to make it more challenging
-    
-    if(position==1)
-    {
-    fruit.x=600;
-    //update below give line of code for increase fruitGroup speed by 4
-    fruit.velocityX=-(8+(score/4));
-    }
-    else
-    {
-      if(position==2){
-      fruit.x=0;
-      
-     //update below give line of code for increase fruitGroup speed by 4
-      fruit.velocityX= 7;
-      }
-    }
-    
-    fruit.scale=0.2;
-     //fruit.debug=true;
-     r=Math.round(random(1,4));
-    if (r == 1) {
-      fruit.addImage(fruit1);
-    } else if (r == 2) {
-      fruit.addImage(fruit2);
-    } else if (r == 3) {
-      fruit.addImage(fruit3);
+  
+  //creating continous opponent players
+  var select_oppPlayer = Math.round(random(1,3));
+  
+  if (World.frameCount % 150 == 0) {
+    if (select_oppPlayer == 1) {
+      pinkCyclists();
+    } else if (select_oppPlayer == 2) {
+      yellowCyclists();
     } else {
-      fruit.addImage(fruit4);
+      redCyclists();
+    }
+  }
+  
+   if(pinkCG.isTouching(mainCyclist)){
+     gameState = END;
+     player1.velocityY = 0;
+     player1.addAnimation("opponentPlayer1",oppPink2Img);
     }
     
-    fruit.y=Math.round(random(50,550));
-   
+    if(yellowCG.isTouching(mainCyclist)){
+      gameState = END;
+      player2.velocityY = 0;
+      player2.addAnimation("opponentPlayer2",oppYellow2Img);
+    }
     
-    fruit.setLifetime=100;
+    if(redCG.isTouching(mainCyclist)){
+      gameState = END;
+      player3.velocityY = 0;
+      player3.addAnimation("opponentPlayer3",oppRed2Img);
+    }
     
-    fruitGroup.add(fruit);
-  }
+}else if (gameState === END) {
+    gameOver.visible = true;
+    //Add code to show restart game instrution in text here
+    
+    
+  
+    path.velocityX = 0;
+    mainCyclist.velocityY = 0;
+    mainCyclist.addAnimation("SahilRunning",mainRacerImg2);
+  
+    pinkCG.setVelocityXEach(0);
+    pinkCG.setLifetimeEach(-1);
+  
+    yellowCG.setVelocityXEach(0);
+    yellowCG.setLifetimeEach(-1);
+  
+    redCG.setVelocityXEach(0);
+    redCG.setLifetimeEach(-1);
+
+    //write condition for calling reset( )
+    
 }
+}
+
+function pinkCyclists(){
+        player1 =createSprite(1100,Math.round(random(50, 250)));
+        player1.scale =0.06;
+        player1.velocityX = -(6 + 2*distance/150);
+        player1.addAnimation("opponentPlayer1",oppPink1Img);
+        player1.setLifetime=170;
+        pinkCG.add(player1);
+}
+
+function yellowCyclists(){
+        player2 =createSprite(1100,Math.round(random(50, 250)));
+        player2.scale =0.06;
+        player2.velocityX = -(6 + 2*distance/150);
+        player2.addAnimation("opponentPlayer2",oppYellow1Img);
+        player2.setLifetime=170;
+        yellowCG.add(player2);
+}
+
+function redCyclists(){
+        player3 =createSprite(1100,Math.round(random(50, 250)));
+        player3.scale =0.06;
+        player3.velocityX = -(6 + 2*distance/150);
+        player3.addAnimation("opponentPlayer3",oppRed1Img);
+        player3.setLifetime=170;
+        redCG.add(player3);
+}
+
+//create reset function here
+
+
+
+
+
+
