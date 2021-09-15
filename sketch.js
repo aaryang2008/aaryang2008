@@ -1,180 +1,154 @@
-var path,mainCyclist;
-var player1,player2,player3;
-var pathImg,mainRacerImg1,mainRacerImg2;
+var bow , arrow,  background, redB, pinkB, greenB ,blueB ,arrowGroup;
+var bowImage, arrowImage, green_balloonImage, red_balloonImage, pink_balloonImage ,blue_balloonImage, backgroundImage;
 
-var oppPink1Img,oppPink2Img;
-var oppYellow1Img,oppYellow2Img;
-var oppRed1Img,oppRed2Img;
-var gameOverImg,cycleBell;
-
-var pinkCG, yellowCG,redCG; 
-
-var END =0;
-var PLAY =1;
-var gameState = PLAY;
-
-var distance=0;
-var gameOver, restart;
-
-function preload(){
-  pathImg = loadImage("images/Road.png");
-  mainRacerImg1 = loadAnimation("images/mainPlayer1.png","images/mainPlayer2.png");
-  mainRacerImg2= loadAnimation("images/mainPlayer3.png");
+var score =0;
+function preload(){  
+  backgroundImage = loadImage("background0.png");
   
-  oppPink1Img = loadAnimation("images/opponent1.png","images/opponent2.png");
-  oppPink2Img = loadAnimation("images/opponent3.png");
-  
-  oppYellow1Img = loadAnimation("images/opponent4.png","images/opponent5.png");
-  oppYellow2Img = loadAnimation("images/opponent6.png");
-  
-  oppRed1Img = loadAnimation("images/opponent7.png","images/opponent8.png");
-  oppRed2Img = loadAnimation("images/opponent9.png");
-  
-  cycleBell = loadSound("sound/bell.mp3");
-  gameOverImg = loadImage("images/gameOver.png");
+  arrowImage = loadImage("arrow0.png");
+  bowImage = loadImage("bow0.png");
+  red_balloonImage = loadImage("red_balloon0.png");
+  green_balloonImage = loadImage("green_balloon0.png");
+  pink_balloonImage = loadImage("pink_balloon0.png");
+  blue_balloonImage = loadImage("blue_balloon0.png");
 }
 
-function setup(){
+function setup() {
+  createCanvas(400, 400);
   
-createCanvas(1200,300);
-// Moving background
-path=createSprite(100,150);
-path.addImage(pathImg);
-path.velocityX = -5;
-
-//creating boy running
-mainCyclist  = createSprite(70,150);
-mainCyclist.addAnimation("SahilRunning",mainRacerImg1);
-mainCyclist.scale=0.07;
+  //creating background
+  scene = createSprite(0,0,400,400);
+  scene.addImage(backgroundImage);
+  scene.scale = 2.5
   
-//set collider for mainCyclist
-
+  // creating bow to shoot arrow
+  bow = createSprite(380,220,20,50);
+  bow.addImage(bowImage); 
+  bow.scale = 1;
   
-gameOver = createSprite(650,150);
-gameOver.addImage(gameOverImg);
-gameOver.scale = 0.8;
-gameOver.visible = false;  
-  
-pinkCG = new Group();
-yellowCG = new Group();
-redCG = new Group();
-  
+  score = 0  
+  redB= new Group();
+  greenB= new Group();
+  blueB= new Group();
+  pinkB= new Group();
+  arrowGroup= new Group();  
 }
 
 function draw() {
-  background(0);
-  
-  drawSprites();
-  textSize(20);
-  fill(255);
-  text("Distance: "+ distance,900,30);
-  
-  if(gameState===PLAY){
-    
-   distance = distance + Math.round(getFrameRate()/50);
-   path.velocityX = -(6 + 2*distance/150);
-  
-   mainCyclist.y = World.mouseY;
-  
-   edges= createEdgeSprites();
-   mainCyclist.collide(edges);
-  
-  //code to reset the background
-  if(path.x < 0 ){
-    path.x = width/2;
+ background(0);
+  // moving ground
+  scene.velocityX = -3 
+
+  if (scene.x < 0){
+    scene.x = scene.width/2;
   }
   
-    //code to play cycle bell sound
-  if(keyDown("space")) {
-    cycleBell.play();
+  //moving bow
+  bow.y = World.mouseY
+  
+  // release arrow when space key is pressed
+  if (keyDown("space")) {
+    createArrow();  
   }
   
-  //creating continous opponent players
-  var select_oppPlayer = Math.round(random(1,3));
+  //creating continous enemies
+  var select_balloon = Math.round(random(1,4));
   
-  if (World.frameCount % 150 == 0) {
-    if (select_oppPlayer == 1) {
-      pinkCyclists();
-    } else if (select_oppPlayer == 2) {
-      yellowCyclists();
+  if (World.frameCount % 100 == 0) {
+    if (select_balloon == 1) {
+      redBalloon();
+    } else if (select_balloon == 2) {
+      greenBalloon();
+    } else if (select_balloon == 3) {
+      blueBalloon();
     } else {
-      redCyclists();
+      pinkBalloon();
     }
   }
   
-   if(pinkCG.isTouching(mainCyclist)){
-     gameState = END;
-     player1.velocityY = 0;
-     player1.addAnimation("opponentPlayer1",oppPink2Img);
-    }
+  if (arrowGroup.isTouching(redB)) {
     
-    if(yellowCG.isTouching(mainCyclist)){
-      gameState = END;
-      player2.velocityY = 0;
-      player2.addAnimation("opponentPlayer2",oppYellow2Img);
-    }
+    redB.destroyEach();
+    //redB.destroy();
+    //redB.Each();
+    //ballon.destroyEach();
     
-    if(redCG.isTouching(mainCyclist)){
-      gameState = END;
-      player3.velocityY = 0;
-      player3.addAnimation("opponentPlayer3",oppRed2Img);
-    }
-    
-}else if (gameState === END) {
-    gameOver.visible = true;
-    //Add code to show restart game instrution in text here
-    
-    
+    arrowGroup.destroyEach();
+    score=score+1;
+  }
+
+  if (arrowGroup.isTouching(greenB)) {
+    greenB.destroyEach();
+    arrowGroup.destroyEach();
+    score=score+3;
+  }
+
+  if (arrowGroup.isTouching(blueB)) {
+    blueB.destroyEach();
+    arrowGroup.destroyEach();
+    score=score+2;
+  }
+
+  if (arrowGroup.isTouching(pinkB)) {
+    pinkB.destroyEach();
+    arrowGroup.destroyEach();
+    score=score+1;
+  }
+
+  drawSprites();
+  text("Score: "+ score, 300,50);
+}
+
+function redBalloon() {
+  var red = createSprite(0,Math.round(random(20, 370)), 10, 10);
+  red.addImage(red_balloonImage);
+  red.velocityX = 3;
+  red.lifetime = 150;
+  red.scale = 0.1;
+  redB.add(red);
+}
+
+function blueBalloon() {
+  var blue = createSprite(0,Math.round(random(20, 370)), 10, 10);
+  blue.addImage(blue_balloonImage);
+  blue.velocityX = 3;
+  blue.lifetime = 150;
+  blue.scale = 0.1;
+  blueB.add(blue);
+}
+
+function greenBalloon() {
+  var green = createSprite(0,Math.round(random(20, 370)), 10, 10);
+  green.addImage(green_balloonImage);
+  green.velocityX = 3;
+  green.lifetime = 150;
+  green.scale = 0.1;
+  greenB.add(green);
+}
+
+function pinkBalloon() {
+  var pink = createSprite(0,Math.round(random(20, 370)), 10, 10);
+  pink.addImage(pink_balloonImage);
+  pink.velocityX = 3;
+  pink.lifetime = 150;
+  pink.scale = 1
+  pinkB.add(pink);
+}
+
+
+// Creating  arrows for bow
+ function createArrow() {
+  var arrow= createSprite(100, 100, 60, 10);
+  arrow.addImage(arrowImage);
+  arrow.x = 360;
+  arrow.y=bow.y;
+  arrow.velocityX = -4;
+  arrow.lifetime = 100;
+  arrow.scale = 0.3;
   
-    path.velocityX = 0;
-    mainCyclist.velocityY = 0;
-    mainCyclist.addAnimation("SahilRunning",mainRacerImg2);
-  
-    pinkCG.setVelocityXEach(0);
-    pinkCG.setLifetimeEach(-1);
-  
-    yellowCG.setVelocityXEach(0);
-    yellowCG.setLifetimeEach(-1);
-  
-    redCG.setVelocityXEach(0);
-    redCG.setLifetimeEach(-1);
-
-    //write condition for calling reset( )
-    
+  //arrowGroup.addGroup(arrow);
+  //arrow.add(arrowGroup);
+  //arrowGroup.add();
+  arrowGroup.add(arrow);
+   
 }
-}
-
-function pinkCyclists(){
-        player1 =createSprite(1100,Math.round(random(50, 250)));
-        player1.scale =0.06;
-        player1.velocityX = -(6 + 2*distance/150);
-        player1.addAnimation("opponentPlayer1",oppPink1Img);
-        player1.setLifetime=170;
-        pinkCG.add(player1);
-}
-
-function yellowCyclists(){
-        player2 =createSprite(1100,Math.round(random(50, 250)));
-        player2.scale =0.06;
-        player2.velocityX = -(6 + 2*distance/150);
-        player2.addAnimation("opponentPlayer2",oppYellow1Img);
-        player2.setLifetime=170;
-        yellowCG.add(player2);
-}
-
-function redCyclists(){
-        player3 =createSprite(1100,Math.round(random(50, 250)));
-        player3.scale =0.06;
-        player3.velocityX = -(6 + 2*distance/150);
-        player3.addAnimation("opponentPlayer3",oppRed1Img);
-        player3.setLifetime=170;
-        redCG.add(player3);
-}
-
-//create reset function here
-
-
-
-
-
-
